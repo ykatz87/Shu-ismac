@@ -1,13 +1,17 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
+// Exclusively obtaining the key from process.env.API_KEY as per instructions.
+// Vite will inject this during build if defined in Vercel.
+const getApiKey = () => {
+  try {
+    return process.env.API_KEY;
+  } catch (e) {
+    return undefined;
+  }
+};
 
-if (!API_KEY) {
-  console.warn("Gemini API key not found. AI features will not work.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
+const API_KEY = getApiKey();
 
 /**
  * MASTER PROMPT: The core intelligence of "Shu Ismak"
@@ -27,8 +31,8 @@ MASTER TRANSLITERATION RULES (Arabic to Hebrew Phonetic):
    - ج (jiim) -> ג' (e.g., גַ'מִיל)
    - ك (kaaf) -> כּ (hard with dagesh)
 3. Emphatics:
-   - ط (taa) -> ט
-   - ص (saad) -> צ
+   - ט (taa) -> ט
+   - צ (saad) -> צ
    - ض (daad) -> צ'
    - ظ (zaad) -> ז'
 4. Interdentals:
@@ -46,8 +50,15 @@ PEDAGOGICAL GUIDELINES:
 - Be encouraging and clear.
 `;
 
+const getAIInstance = () => {
+  if (!API_KEY) {
+    throw new Error("מפתח API לא הוגדר. אנא הגדר את API_KEY ב-Vercel Environment Variables.");
+  }
+  return new GoogleGenAI({ apiKey: API_KEY });
+};
+
 export async function convertTransliterationToSpokenArabic(transliteration: string): Promise<string> {
-    if (!API_KEY) throw new Error("Gemini API key not found.");
+    const ai = getAIInstance();
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -64,7 +75,7 @@ export async function convertTransliterationToSpokenArabic(transliteration: stri
 }
 
 export async function getPronunciationFeedback(audioBase64: string, correctPhrase: string): Promise<string> {
-    if (!API_KEY) return "מפתח API חסר.";
+    const ai = getAIInstance();
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -84,7 +95,7 @@ export async function getPronunciationFeedback(audioBase64: string, correctPhras
 }
 
 export async function generateConversationTopic(): Promise<any> {
-    if (!API_KEY) throw new Error("API Key missing.");
+    const ai = getAIInstance();
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -119,7 +130,7 @@ export async function generateConversationTopic(): Promise<any> {
 }
 
 export async function getTranslationForDrill(hebrewPhrase: string, context: string): Promise<string> {
-    if (!API_KEY) throw new Error("API Key missing.");
+    const ai = getAIInstance();
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
