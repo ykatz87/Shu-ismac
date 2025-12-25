@@ -1,10 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-/**
- * MASTER PROMPT: The core intelligence of "Shu Ismak"
- * Consolidates transliteration rules, pedagogical approach, and linguistic dialect.
- */
 export const SHU_ISMAK_CORE_PROMPT = `
 You are "Shu Ismak AI Assistant", a specialist tutor for spoken Palestinian Arabic (Ammiya) designed for Hebrew speakers.
 
@@ -12,7 +8,7 @@ MASTER TRANSLITERATION RULES (Arabic to Hebrew Phonetic):
 1. Gutturals:
    - ע (ein) -> ע (e.g., עַרַבִּי)
    - غ (ghayn) -> ע׳ (e.g., ע׳ַאלי)
-   - ح (haa) -> ח (e.g., חַבִּיבּ)
+   - ח (haa) -> ח (e.g., חַבִּיבּ)
    - خ (khaa) -> ח׳ (e.g., ח׳וּבְּז)
 2. Stops and Plosives:
    - ء (hamza) or Qaf (dialect) -> א (e.g., סַאַל, אֻלְתִלּוֹ)
@@ -39,10 +35,10 @@ PEDAGOGICAL GUIDELINES:
 `;
 
 export async function convertTransliterationToSpokenArabic(transliteration: string): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: `Based on the rules provided, convert this Hebrew transliteration to standard Arabic script with full diacritics. Input: "${transliteration}"`,
             config: {
                 systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the Arabic text result."
@@ -56,10 +52,10 @@ export async function convertTransliterationToSpokenArabic(transliteration: stri
 }
 
 export async function getPronunciationFeedback(audioBase64: string, correctPhrase: string): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: {
                 parts: [
                     { inlineData: { mimeType: 'audio/wav', data: audioBase64 } },
@@ -76,10 +72,10 @@ export async function getPronunciationFeedback(audioBase64: string, correctPhras
 }
 
 export async function generateConversationTopic(): Promise<any> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: "Generate a conversation topic with vocabulary and one example sentence.",
             config: {
                 systemInstruction: SHU_ISMAK_CORE_PROMPT,
@@ -103,8 +99,8 @@ export async function generateConversationTopic(): Promise<any> {
                 }
             }
         });
-        const text = response.text || "{}";
-        return JSON.parse(text);
+        const text = response.text;
+        return text ? JSON.parse(text.trim()) : {};
     } catch (error) {
         console.error("Topic generation error:", error);
         throw error;
@@ -112,15 +108,15 @@ export async function generateConversationTopic(): Promise<any> {
 }
 
 export async function getTranslationForDrill(hebrewPhrase: string, context: string): Promise<string> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: `Translate to spoken Palestinian Arabic using transliteration rules. Context: "${context}". Hebrew: "${hebrewPhrase}".`,
             config: { systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the transliteration." }
         });
-        const result = response.text || "";
-        return result.trim().replace(/[\`"']/g, '');
+        const text = response.text;
+        return text ? text.trim().replace(/[\`"']/g, '') : "";
     } catch (error) {
         console.error("Translation error:", error);
         throw error;

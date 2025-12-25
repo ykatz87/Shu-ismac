@@ -96,7 +96,7 @@ const NounCard: React.FC<{ noun: Noun }> = ({ noun }) => {
                                             <td className="p-3">
                                                 {p.plural ? (
                                                      <div className="flex items-center justify-end gap-2">
-                                                        <AudioButton text={p.plural} />
+                                                        <AudioButton text={p.plural || ''} />
                                                         <span className="text-lg font-semibold text-teal-800">{p.plural}</span>
                                                     </div>
                                                 ) : <span className="text-gray-400">-</span>}

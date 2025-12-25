@@ -3,8 +3,6 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import { convertTransliterationToSpokenArabic } from './geminiService';
 import { getCachedAudio, setCachedAudio } from './audioCacheService';
 
-const API_KEY = process.env.API_KEY || '';
-
 let currentAudioSource: AudioBufferSourceNode | null = null;
 
 function decode(base64: string): Uint8Array {
@@ -42,12 +40,11 @@ const playDecodedAudio = async (base64Audio: string) => {
 };
 
 export async function generateAndPlayAudio(text: string): Promise<void> {
-    if (!API_KEY) return;
     try {
         const cached = await getCachedAudio(text);
         if (cached) { await playDecodedAudio(cached); return; }
 
-        const ai = new GoogleGenAI({ apiKey: API_KEY });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const arabicText = await convertTransliterationToSpokenArabic(text);
 
         const response = await ai.models.generateContent({
