@@ -1,6 +1,6 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Assume process.env.API_KEY is configured in the environment.
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
@@ -9,168 +9,126 @@ if (!API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: API_KEY! });
 
+/**
+ * MASTER PROMPT: The core intelligence of "Shu Ismak"
+ * Consolidates transliteration rules, pedagogical approach, and linguistic dialect.
+ */
+export const SHU_ISMAK_CORE_PROMPT = `
+You are "Shu Ismak AI Assistant", a specialist tutor for spoken Palestinian Arabic (Ammiya) designed for Hebrew speakers.
+
+MASTER TRANSLITERATION RULES (Arabic to Hebrew Phonetic):
+1. Gutturals:
+   - ע (ein) -> ע (e.g., עַרַבִּי)
+   - غ (ghayn) -> ע׳ (e.g., ע׳ַאלי)
+   - ح (haa) -> ח (e.g., חַבִּיבּ)
+   - خ (khaa) -> ח׳ (e.g., ח׳וּבְּז)
+2. Stops and Plosives:
+   - ء (hamza) or Qaf (dialect) -> א (e.g., סַאַל, אֻלְתִלּוֹ)
+   - ج (jiim) -> ג' (e.g., גַ'מִיל)
+   - ك (kaaf) -> כּ (hard with dagesh)
+3. Emphatics:
+   - ط (taa) -> ט
+   - ص (saad) -> צ
+   - ض (daad) -> צ'
+   - ظ (zaad) -> ז'
+4. Interdentals:
+   - ث (thaa) -> ת' (e.g., תַ'לַאתֶ'ה)
+   - ذ (dhaal) -> ד' (e.g., דַ'הַבּ)
+5. Shadda (Doubling):
+   - Double the Hebrew letter and add a Sheva to the first one (e.g., סַכְכַּר, אַחְנַּא).
+6. Vowels (Nikud):
+   - Strictly use Hebrew Nikud: PataH/Kamatz (a), Hirik (i), Kubutz/Shuruq (u), Segol/Tzere (e), Holam (o).
+
+PEDAGOGICAL GUIDELINES:
+- Focus on practical, every-day communication.
+- Use ONLY spoken Palestinian dialect (not Fusha).
+- Emphasize root connections between Hebrew and Arabic.
+- Be encouraging and clear.
+`;
+
 export async function convertTransliterationToSpokenArabic(transliteration: string): Promise<string> {
-    if (!API_KEY) {
-        throw new Error("Gemini API key not found.");
-    }
+    if (!API_KEY) throw new Error("Gemini API key not found.");
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `
-                You are a linguistic tool that converts Hebrew-based phonetic transliteration of spoken Palestinian Arabic into Arabic script with precise diacritics. Your output is fed directly into a Text-to-Speech engine, so the diacritics (harakat) MUST perfectly match the spoken dialect's pronunciation.
-
-                **CRITICAL RULES:**
-                1.  **Follow the Nikud:** The Hebrew nikud (vowels) in the transliteration is the absolute source of truth for pronunciation. Your Arabic output must reflect it exactly.
-                2.  **Spoken Dialect Only:** Do NOT use formal or literary Arabic (MSA) grammar or endings. This is especially important for case endings.
-                3.  **No Extra Text:** Return ONLY the Arabic script with diacritics.
-
-                **EXAMPLES:**
-                - Input: "כּיף חאלַכּ"
-                - Correct Output: "كِيف حَالَك"
-                - Wrong Output: "كَيْفَ حَالُكَ" (This is MSA, incorrect).
-
-                - Input: "אַנַא בַּכְּתֹבּ"
-                - Correct Output: "أَنَا بَكْتُب"
-
-                - Input: "שוּ אִסְמַכּ"
-                - Correct Output: "شُو اسْمَك"
-
-                **TASK:**
-                Convert the following transliteration: "${transliteration}"
-            `
+            contents: `Based on the rules provided, convert this Hebrew transliteration to standard Arabic script with full diacritics. Input: "${transliteration}"`,
+            config: {
+                systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the Arabic text result."
+            }
         });
         return response.text.trim();
     } catch (error) {
-        console.error("Error converting transliteration to Arabic:", error);
-        throw new Error("Failed to convert transliteration.");
+        console.error("Error converting transliteration:", error);
+        throw error;
     }
 }
 
-
-export async function getPronunciationFeedback(
-  audioBase64: string,
-  correctPhrase: string
-): Promise<string> {
-  if (!API_KEY) {
-    return "תכונת ה-AI אינה זמינה. חסר מפתח API.";
-  }
-
-  try {
-    const audioPart = {
-      inlineData: {
-        mimeType: 'audio/wav',
-        data: audioBase64,
-      },
-    };
-
-    const textPart = {
-      text: `
-אתה מורה לערבית פלסטינית מדוברת. התלמיד ניסה לומר: "${correctPhrase}"
-
-האזן להקלטה ותן משוב בעברית על:
-1. דיוק ההגייה
-2. איזה צלילים יצאו טוב
-3. איזה צלילים צריכים שיפור
-4. עצות קונקרטיות לשיפור
-
-המשוב צריך להיות חיובי, מעודד, ומעשי.
-החזר רק את גוף המשוב, ללא הקדמות.
-לדוגמה:
-✅ יפה מאוד! ההגייה שלך מדויקת.
-💡 טיפ קטן: נסה להדגיש יותר את הצליל "ח" בתחילת המילה "חאל".
-המשך לתרגל! 💪
-`
-    };
-    
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts: [audioPart, textPart] },
-    });
-
-    return response.text.trim();
-  } catch (error) {
-    console.error("Error calling Gemini API for feedback:", error);
-    throw new Error("Failed to get pronunciation feedback from Gemini.");
-  }
+export async function getPronunciationFeedback(audioBase64: string, correctPhrase: string): Promise<string> {
+    if (!API_KEY) return "מפתח API חסר.";
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: {
+                parts: [
+                    { inlineData: { mimeType: 'audio/wav', data: audioBase64 } },
+                    { text: `The user is practicing this phrase: "${correctPhrase}". Provide feedback in Hebrew on their pronunciation precision and stress.` }
+                ]
+            },
+            config: { systemInstruction: SHU_ISMAK_CORE_PROMPT }
+        });
+        return response.text.trim();
+    } catch (error) {
+        console.error("Feedback error:", error);
+        throw error;
+    }
 }
 
-export async function generateConversationTopic(): Promise<{ topic: string, vocabulary: { arabic: string, hebrew: string }[], example: string }> {
-  if (!API_KEY) {
-    throw new Error("Gemini API key not found.");
-  }
-  
-  try {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `
-צור נושא שיחה פשוט בערבית פלסטינית מדוברת למתחילים.
-התמקד בסיטואציות יומיומיות: קניות, הזמנת אוכל, שאילת שלום, וכו'.
-החזר בפורמט JSON בלבד, התואם למבנה הבא:
-{
-  "topic": "כותרת הנושא בעברית",
-  "vocabulary": [
-    {"arabic": "תעתיק עברי למילה 1", "hebrew": "תרגום לעברית"},
-    {"arabic": "תעתיק עברי למילה 2", "hebrew": "תרגום לעברית"},
-    {"arabic": "תעתיק עברי למילה 3", "hebrew": "תרגום לעברית"}
-  ],
-  "example": "משפט לדוגמה קצר בתעתיק עברי"
+export async function generateConversationTopic(): Promise<any> {
+    if (!API_KEY) throw new Error("API Key missing.");
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: "Generate a conversation topic with vocabulary and one example sentence.",
+            config: {
+                systemInstruction: SHU_ISMAK_CORE_PROMPT,
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        topic: { type: Type.STRING },
+                        vocabulary: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    arabic: { type: Type.STRING, description: "Transliterated Arabic" },
+                                    hebrew: { type: Type.STRING }
+                                }
+                            }
+                        },
+                        example: { type: Type.STRING, description: "Transliterated Arabic example" }
+                    }
+                }
+            }
+        });
+        return JSON.parse(response.text.trim());
+    } catch (error) {
+        console.error("Topic generation error:", error);
+        throw error;
+    }
 }
-`,
-      config: {
-        responseMimeType: "application/json",
-      }
-    });
 
-    const jsonText = response.text.trim();
-    return JSON.parse(jsonText);
-
-  } catch (error) {
-    console.error("Error calling Gemini API for conversation topic:", error);
-    throw new Error("Failed to generate conversation topic from Gemini.");
-  }
-}
-
-export async function getTranslationForDrill(
-  hebrewPhrase: string,
-  context: string
-): Promise<string> {
-  if (!API_KEY) {
-    throw new Error("Gemini API key not found.");
-  }
-  try {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `
-You are a linguistic tool that translates Hebrew to spoken Palestinian Arabic.
-Your output must follow a specific Hebrew-based phonetic transliteration system.
-The user is in a lesson about "${context}".
-The user wants to know how to say: "${hebrewPhrase}"
-
-**Transliteration Rules:**
-- ع (ein) -> ע
-- غ (ghayn) -> ע׳
-- ح (haa) -> ח
-- خ (khaa) -> ח׳
-- ء (hamza) -> א
-- ج (jiim) -> ג'
-- ك (kaaf, hard) -> כּ (with dagesh)
-- ط (taa) -> ט
-- ص (saad) -> צ
-- ث (thaa) -> ת'
-- ذ (dhaal) -> ד'
-- Shadda (doubling) -> double the consonant (e.g., סַכְכַּר)
-
-**CRITICAL TASK:**
-Provide ONLY the transliterated spoken Palestinian Arabic phrase. Do not add any other text, explanations, or quotation marks.
-
-Example Input: "אפשר חשבון בבקשה"
-Example Output: "מֻמְכֵּן אִל-חְסַאבּ, מִן פַצְ׳לַכּ"
-`
-    });
-    // Remove potential quotes or markdown from the response
-    return response.text.trim().replace(/[\`"']/g, '');
-  } catch (error) {
-    console.error("Error generating translation:", error);
-    throw new Error("Failed to generate translation from Gemini.");
-  }
+export async function getTranslationForDrill(hebrewPhrase: string, context: string): Promise<string> {
+    if (!API_KEY) throw new Error("API Key missing.");
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Translate to spoken Palestinian Arabic using transliteration rules. Context: "${context}". Hebrew: "${hebrewPhrase}".`,
+            config: { systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the transliteration." }
+        });
+        return response.text.trim().replace(/[\`"']/g, '');
+    } catch (error) {
+        console.error("Translation error:", error);
+        throw error;
+    }
 }

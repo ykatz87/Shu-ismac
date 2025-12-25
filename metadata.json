@@ -1,6 +1,6 @@
 {
-  "name": "Shu Ismak? Learn Palestinian Arabic",
-  "description": "An application for Hebrew speakers to learn spoken Palestinian Arabic through a unique phonetic Hebrew transliteration system. The app features interactive lessons, stories, and a 'Playground' for pronunciation practice, games, and voice comparison.",
+  "name": "שוּ אִסְמַכּ? - למד ערבית פלסטינית",
+  "description": "אפליקציה ללימוד ערבית פלסטינית מדוברת לדוברי עברית באמצעות שיטת תעתיק ייחודית. כולל שיעורים, סיפורים, ומגרש משחקים מבוסס AI.",
   "requestFramePermissions": [
     "microphone"
   ]
