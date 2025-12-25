@@ -1,18 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Exclusively obtaining the key from process.env.API_KEY as per instructions.
-// Vite will inject this during build if defined in Vercel.
-const getApiKey = () => {
-  try {
-    return process.env.API_KEY;
-  } catch (e) {
-    return undefined;
-  }
-};
-
-const API_KEY = getApiKey();
-
 /**
  * MASTER PROMPT: The core intelligence of "Shu Ismak"
  * Consolidates transliteration rules, pedagogical approach, and linguistic dialect.
@@ -28,8 +16,8 @@ MASTER TRANSLITERATION RULES (Arabic to Hebrew Phonetic):
    - خ (khaa) -> ח׳ (e.g., ח׳וּבְּז)
 2. Stops and Plosives:
    - ء (hamza) or Qaf (dialect) -> א (e.g., סַאַל, אֻלְתִלּוֹ)
-   - ج (jiim) -> ג' (e.g., גַ'מִיל)
-   - ك (kaaf) -> כּ (hard with dagesh)
+   - ג (jiim) -> ג' (e.g., גַ'מִיל)
+   - כ (kaaf) -> כּ (hard with dagesh)
 3. Emphatics:
    - ט (taa) -> ט
    - צ (saad) -> צ
@@ -50,15 +38,8 @@ PEDAGOGICAL GUIDELINES:
 - Be encouraging and clear.
 `;
 
-const getAIInstance = () => {
-  if (!API_KEY) {
-    throw new Error("מפתח API לא הוגדר. אנא הגדר את API_KEY ב-Vercel Environment Variables.");
-  }
-  return new GoogleGenAI({ apiKey: API_KEY });
-};
-
 export async function convertTransliterationToSpokenArabic(transliteration: string): Promise<string> {
-    const ai = getAIInstance();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -67,7 +48,7 @@ export async function convertTransliterationToSpokenArabic(transliteration: stri
                 systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the Arabic text result."
             }
         });
-        return response.text.trim();
+        return response.text || "";
     } catch (error) {
         console.error("Error converting transliteration:", error);
         throw error;
@@ -75,7 +56,7 @@ export async function convertTransliterationToSpokenArabic(transliteration: stri
 }
 
 export async function getPronunciationFeedback(audioBase64: string, correctPhrase: string): Promise<string> {
-    const ai = getAIInstance();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -87,7 +68,7 @@ export async function getPronunciationFeedback(audioBase64: string, correctPhras
             },
             config: { systemInstruction: SHU_ISMAK_CORE_PROMPT }
         });
-        return response.text.trim();
+        return response.text || "לא התקבל משוב מהשרת.";
     } catch (error) {
         console.error("Feedback error:", error);
         throw error;
@@ -95,7 +76,7 @@ export async function getPronunciationFeedback(audioBase64: string, correctPhras
 }
 
 export async function generateConversationTopic(): Promise<any> {
-    const ai = getAIInstance();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -122,7 +103,8 @@ export async function generateConversationTopic(): Promise<any> {
                 }
             }
         });
-        return JSON.parse(response.text.trim());
+        const text = response.text || "{}";
+        return JSON.parse(text);
     } catch (error) {
         console.error("Topic generation error:", error);
         throw error;
@@ -130,14 +112,15 @@ export async function generateConversationTopic(): Promise<any> {
 }
 
 export async function getTranslationForDrill(hebrewPhrase: string, context: string): Promise<string> {
-    const ai = getAIInstance();
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Translate to spoken Palestinian Arabic using transliteration rules. Context: "${context}". Hebrew: "${hebrewPhrase}".`,
             config: { systemInstruction: SHU_ISMAK_CORE_PROMPT + "\nReturn ONLY the transliteration." }
         });
-        return response.text.trim().replace(/[\`"']/g, '');
+        const result = response.text || "";
+        return result.trim().replace(/[\`"']/g, '');
     } catch (error) {
         console.error("Translation error:", error);
         throw error;

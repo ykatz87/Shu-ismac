@@ -1,11 +1,10 @@
 
 import { GoogleGenAI, Modality } from "@google/genai";
-import { convertTransliterationToSpokenArabic, SHU_ISMAK_CORE_PROMPT } from './geminiService';
+import { convertTransliterationToSpokenArabic } from './geminiService';
 import { getCachedAudio, setCachedAudio } from './audioCacheService';
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || '';
 
-let currentAudioContext: AudioContext | null = null;
 let currentAudioSource: AudioBufferSourceNode | null = null;
 
 function decode(base64: string): Uint8Array {
@@ -33,7 +32,6 @@ const playDecodedAudio = async (base64Audio: string) => {
     }
     const sampleRate = 24000;
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate });
-    currentAudioContext = ctx;
 
     const audioBuffer = await decodeAudioData(decode(base64Audio), ctx, sampleRate);
     const source = ctx.createBufferSource();

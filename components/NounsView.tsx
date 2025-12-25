@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { NOUNS } from '../constants';
-// FIX: Import `View` from `../App` instead of `../types`.
 import { Noun } from '../types';
 import { View } from '../App';
 import { PlayIcon, LoadingSpinnerIcon, ChevronDownIcon, ArrowLeftIcon } from './Icons';
@@ -29,10 +29,10 @@ const AudioButton: React.FC<{ text: string }> = ({ text }) => {
 const NounCard: React.FC<{ noun: Noun }> = ({ noun }) => {
     const basicForms = [
         { form: 'יחיד', transliteration: noun.singular.transliteration },
-        { form: 'רבים', transliteration: noun.plural?.transliteration },
+        { form: 'רבים', transliteration: noun.plural?.transliteration || '' },
         { form: "ה' הידיעה (יחיד)", transliteration: noun.definite.singular },
-        { form: "ה' הידיעה (רבים)", transliteration: noun.definite.plural },
-    ].filter(f => f.transliteration);
+        { form: "ה' הידיעה (רבים)", transliteration: noun.definite.plural || '' },
+    ].filter(f => f.transliteration !== '');
 
     return (
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
@@ -41,7 +41,6 @@ const NounCard: React.FC<{ noun: Noun }> = ({ noun }) => {
             </div>
             
             <div className="p-4 md:p-6 space-y-6">
-                {/* Basic Forms Card */}
                 <div className="rounded-lg border border-gray-200 overflow-hidden">
                     <div className="p-3 bg-gray-50">
                         <h4 className="font-semibold text-gray-700">צורות יחיד ורבים</h4>
@@ -70,7 +69,6 @@ const NounCard: React.FC<{ noun: Noun }> = ({ noun }) => {
                     </div>
                 </div>
 
-                {/* Possessives Card */}
                 <div className="rounded-lg border border-gray-200 overflow-hidden">
                     <div className="p-3 bg-gray-50">
                         <h4 className="font-semibold text-gray-700">כינויי קניין (שייכות)</h4>
@@ -120,7 +118,7 @@ interface NounsViewProps {
 }
 
 const NounsView: React.FC<NounsViewProps> = ({ setView }) => {
-    const categories = [...new Set(NOUNS.map(n => n.category))];
+    const categories = Array.from(new Set(NOUNS.map(n => n.category)));
     const [expandedCategory, setExpandedCategory] = useState<string | null>(categories.length > 0 ? categories[0] : null);
     
     return (
