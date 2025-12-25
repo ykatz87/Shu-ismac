@@ -1,3 +1,4 @@
+
 // FIX: Removed self-import of VocabularyWord. A file cannot import from itself.
 export type Tense = 'past' | 'present' | 'future' | 'imperative';
 
@@ -58,6 +59,25 @@ export interface Noun {
         singular: string;
         plural?: string;
     }>;
+}
+
+export interface Pronoun {
+  id: string;
+  hebrew: string;
+  transliteration: string;
+  category: 'singular' | 'plural';
+}
+
+export interface PseudoVerb {
+  id: string;
+  baseHebrew: string;
+  baseTransliteration: string;
+  conjugations: Array<{
+    pronoun: string;
+    arabicPronoun: string;
+    transliteration: string;
+    hebrew: string;
+  }>;
 }
 
 export interface StorySentence {

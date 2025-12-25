@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { View } from '../App';
-import { AcademicCapIcon, PencilSwooshIcon, DocumentTextIcon, TargetIcon, GamepadIcon, BookOpenIcon, ChatBubbleLeftRightIcon, SparklesIcon } from './Icons';
+import { AcademicCapIcon, PencilSwooshIcon, DocumentTextIcon, TargetIcon, GamepadIcon, BookOpenIcon, ChatBubbleLeftRightIcon, SparklesIcon, UsersIcon } from './Icons';
 
 interface LearningPathViewProps {
   setView: (view: View) => void;
@@ -14,50 +15,62 @@ const steps = [
     icon: <AcademicCapIcon className="w-8 h-8" />,
   },
   {
+    view: 'pronouns' as View,
+    title: 'שלב 2: שמות גוף (כינויי גוף)',
+    description: 'הבסיס לכל משפט ופועל. למד כיצד להתייחס לעצמך ולאחרים.',
+    icon: <UsersIcon className="w-8 h-8" />,
+  },
+  {
+    view: 'pseudoVerbs' as View,
+    title: 'שלב 3: רוצה ויש לי',
+    description: 'למד את המילים "בִּדִּי" ו-"עִנְדִּי" - הכלים הכי שימושיים בשיחה.',
+    icon: <SparklesIcon className="w-8 h-8" />,
+  },
+  {
     view: 'verbs' as View,
-    title: 'שלב 2: לימוד פעלים',
+    title: 'שלב 4: לימוד פעלים',
     description: 'למד את הפעלים הנפוצים ביותר ואת הטיותיהם בזמנים השונים.',
     icon: <PencilSwooshIcon className="w-8 h-8" />,
   },
   {
     view: 'nouns' as View,
-    title: 'שלב 3: לימוד שמות עצם',
+    title: 'שלב 5: לימוד שמות עצם',
     description: 'הרחב את אוצר המילים שלך עם שמות עצם שימושיים וכינויי קניין.',
     icon: <DocumentTextIcon className="w-8 h-8" />,
   },
   {
     view: 'participles' as View,
-    title: 'שלב 4: בינוני פועל ופעול',
+    title: 'שלב 6: בינוני פועל ופעול',
     description: 'למד להפוך פעלים לשמות תואר (למשל "כותב" ו"כתוב").',
     icon: <SparklesIcon className="w-8 h-8" />,
   },
   {
     view: 'adjectives' as View,
-    title: 'שלב 5: לימוד שמות תואר',
+    title: 'שלב 7: לימוד שמות תואר',
     description: 'למד איך לתאר אנשים, חפצים ומצבים בצבעים, גדלים ותכונות.',
     icon: <SparklesIcon className="w-8 h-8" />,
   },
   {
     view: 'phrases' as View,
-    title: 'שלב 6: ביטויים שימושיים',
+    title: 'שלב 8: ביטויים שימושיים',
     description: 'למד משפטים נפוצים והתחל לבנות שיחות פשוטות.',
     icon: <ChatBubbleLeftRightIcon className="w-8 h-8" />,
   },
   {
     view: 'drills' as View,
-    title: 'שלב 7: תרגול ושינון',
+    title: 'שלב 9: תרגול ושינון',
     description: 'חזק את הידע שלך עם תרגילים אינטראקטיביים על פעלים ושמות עצם.',
     icon: <TargetIcon className="w-8 h-8" />,
   },
    {
     view: 'stories' as View,
-    title: 'שלב 8: סיפורים ומשלים',
+    title: 'שלב 10: סיפורים ומשלים',
     description: 'שפר את הבנת הנשמע ואוצר המילים דרך סיפורים קצרים.',
     icon: <BookOpenIcon className="w-8 h-8" />,
   },
   {
     view: 'playground' as View,
-    title: 'שלב 9: מגרש המשחקים',
+    title: 'שלב 11: מגרש המשחקים',
     description: 'השלב המעשי! תרגל הגייה ושיחה עם עזרה מהבינה המלאכותית.',
     icon: <GamepadIcon className="w-8 h-8" />,
   },
@@ -97,7 +110,7 @@ const LearningPathView: React.FC<LearningPathViewProps> = ({ setView }) => {
 const PathCard: React.FC<{ step: typeof steps[0]; setView: (view: View) => void; }> = ({ step, setView }) => (
     <button 
         onClick={() => setView(step.view)}
-        className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 w-full text-right hover:shadow-xl hover:border-teal-400 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
+        className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 w-full text-right hover:shadow-xl hover:border-teal-400 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-teal-50 focus:ring-opacity-50"
     >
         <h3 className="text-xl font-bold text-teal-800 mb-2">{step.title}</h3>
         <p className="text-gray-600">{step.description}</p>

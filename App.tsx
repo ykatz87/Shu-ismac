@@ -1,6 +1,9 @@
+
 import React, { useState } from 'react';
 import HomeView from './components/HomeView';
 import IntroductionView from './components/IntroductionView';
+import PronounsView from './components/PronounsView';
+import PseudoVerbsView from './components/PseudoVerbsView';
 import VerbsView from './components/VerbsView';
 import NounsView from './components/NounsView';
 import ParticiplesView from './components/ParticiplesView';
@@ -19,6 +22,8 @@ import { SITUATIONAL_LESSONS } from './constants';
 export type View = 
   | 'home'
   | 'introduction' 
+  | 'pronouns'
+  | 'pseudoVerbs'
   | 'verbs' 
   | 'nouns'
   | 'participles'
@@ -35,6 +40,8 @@ export type View =
 const viewTitles: Record<string, string> = {
     home: "שוּ אִסְמַכּ? - למד ערבית פלסטינית",
     introduction: "מבוא - שיטת התעתיק",
+    pronouns: "שמות גוף (כינויי גוף)",
+    pseudoVerbs: "רוצה ויש לי (בִּדִּי וְעִנְדִּי)",
     verbs: "בנק הפעלים",
     nouns: "לימוד שמות עצם",
     participles: "בינוני פועל ופעול",
@@ -85,6 +92,10 @@ const App: React.FC = () => {
         return <HomeView setView={navigateTo} />;
       case 'introduction':
         return <IntroductionView setView={navigateTo} />;
+      case 'pronouns':
+        return <PronounsView setView={navigateTo} />;
+      case 'pseudoVerbs':
+        return <PseudoVerbsView setView={navigateTo} />;
       case 'verbs':
         return <VerbsView setView={navigateTo} />;
       case 'nouns':

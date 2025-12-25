@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TRANSCRIPTION } from '../constants';
 import { PlayIcon, LoadingSpinnerIcon, ArrowLeftIcon } from './Icons';
@@ -86,10 +87,10 @@ const IntroductionView: React.FC<IntroductionViewProps> = ({ setView }) => {
 
         <div className="mt-12 text-center">
             <button
-                onClick={() => setView('verbs')}
+                onClick={() => setView('pronouns')}
                 className="flex items-center justify-center gap-3 mx-auto px-8 py-4 bg-teal-600 text-white font-bold text-xl rounded-full hover:bg-teal-700 transition-all transform hover:scale-105 shadow-md"
             >
-                <span>לשיעור הבא: לימוד פעלים</span>
+                <span>לשיעור הבא: שמות גוף</span>
                 <ArrowLeftIcon className="w-6 h-6" />
             </button>
         </div>
